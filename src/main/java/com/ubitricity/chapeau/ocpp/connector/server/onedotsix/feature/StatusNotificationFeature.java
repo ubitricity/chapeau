@@ -7,6 +7,7 @@
  */
 package com.ubitricity.chapeau.ocpp.connector.server.onedotsix.feature;
 
+import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.enums.ActionType;
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.StatusNotificationConfirmation;
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.StatusNotificationRequest;
 import eu.chargetime.ocpp.feature.ProfileFeature;

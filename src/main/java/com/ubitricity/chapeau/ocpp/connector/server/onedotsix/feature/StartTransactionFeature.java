@@ -8,31 +8,32 @@
 package com.ubitricity.chapeau.ocpp.connector.server.onedotsix.feature;
 
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.enums.ActionType;
-import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.BootNotificationConfirmation;
-import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.BootNotificationRequest;
+import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.StartTransactionConfirmation;
+import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.StartTransactionRequest;
 import eu.chargetime.ocpp.feature.ProfileFeature;
 import eu.chargetime.ocpp.feature.profile.Profile;
 import eu.chargetime.ocpp.model.Confirmation;
 import eu.chargetime.ocpp.model.Request;
 
-public class BootNotificationFeature extends ProfileFeature {
 
-    public BootNotificationFeature(Profile ownerProfile) {
+public class StartTransactionFeature extends ProfileFeature {
+
+    public StartTransactionFeature(Profile ownerProfile) {
         super(ownerProfile);
     }
 
     @Override
     public Class<? extends Request> getRequestType() {
-        return BootNotificationRequest.class;
+        return StartTransactionRequest.class;
     }
 
     @Override
     public Class<? extends Confirmation> getConfirmationType() {
-        return BootNotificationConfirmation.class;
+        return StartTransactionConfirmation.class;
     }
 
     @Override
     public String getAction() {
-        return ActionType.BOOT_NOTIFICATION.getValue();
+        return ActionType.START_TRANSACTION.getValue();
     }
 }

@@ -12,7 +12,9 @@ import com.ubitricity.chapeau.ocpp.connector.server.OcppSessionHandler;
 import com.ubitricity.chapeau.ocpp.connector.server.helper.OcppIncomingRequestHandler;
 import com.ubitricity.chapeau.ocpp.connector.server.helper.OcppProfile;
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.feature.BootNotificationFeature;
+import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.feature.StartTransactionFeature;
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.feature.StatusNotificationFeature;
+import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.feature.StopTransactionFeature;
 import eu.chargetime.ocpp.feature.Feature;
 import eu.chargetime.ocpp.feature.ProfileFeature;
 import eu.chargetime.ocpp.model.Confirmation;
@@ -28,13 +30,13 @@ public class OcppOneDotSixProfile implements OcppProfile {
 
     private final OcppSessionHandler ocppSessionHandler;
     private final Map<Class<? extends Request>, OcppIncomingRequestHandler<? extends Request>> handlerMap;
-//    private final CallAuditService callAuditService;
+    //    private final CallAuditService callAuditService;
     private final ObjectMapper objectMapper;
 //    private final Validator validator;
 
     public OcppOneDotSixProfile(OcppSessionHandler ocppSessionHandler,
                                 Map<Class<? extends Request>, OcppIncomingRequestHandler<? extends Request>> handlerMap,
-                                /*CallAuditService callAuditService,*/ ObjectMapper objectMapper/*, Validator validator*/) {
+            /*CallAuditService callAuditService,*/ ObjectMapper objectMapper/*, Validator validator*/) {
         this.ocppSessionHandler = ocppSessionHandler;
         this.handlerMap = handlerMap;
 //        this.callAuditService = callAuditService;
@@ -46,8 +48,10 @@ public class OcppOneDotSixProfile implements OcppProfile {
     public ProfileFeature[] getFeatureList() {
         return new ProfileFeature[]{
 //            new AuthorizeFeature(this),
-            new BootNotificationFeature(this),
-            new StatusNotificationFeature(this)
+                new BootNotificationFeature(this),
+                new StatusNotificationFeature(this),
+                new StartTransactionFeature(this),
+                new StopTransactionFeature(this)
         };
     }
 
@@ -55,7 +59,7 @@ public class OcppOneDotSixProfile implements OcppProfile {
     public Confirmation handleRequest(UUID sessionId, Request request) {
         log.debug("handleRequest: sessionId: {} request: {}", sessionId, request);
         return ocppSessionHandler.getActiveSessionEntry(sessionId)
-            .map(deviceIdSessionEntry -> handle(deviceIdSessionEntry, request)).orElse(null);
+                .map(deviceIdSessionEntry -> handle(deviceIdSessionEntry, request)).orElse(null);
     }
 
     private Confirmation handle(Map.Entry<String, UUID> deviceIdSessionEntry, Request request) {
@@ -72,7 +76,7 @@ public class OcppOneDotSixProfile implements OcppProfile {
         watch.start();*/
 
         var response = handlerMap.get(request.getClass())
-            .handleRequest(deviceIdSessionEntry.getValue(), deviceIdSessionEntry.getKey(), request, getProtocol());
+                .handleRequest(deviceIdSessionEntry.getValue(), deviceIdSessionEntry.getKey(), request, getProtocol());
 
         /*watch.stop();
 
@@ -93,10 +97,10 @@ public class OcppOneDotSixProfile implements OcppProfile {
 
     private String findOperation(Request request) {
         return Arrays.stream(getFeatureList())
-            .filter(f -> (f.getRequestType().equals(request.getClass())))
-            .findFirst()
-            .map(Feature::getAction)
-            .orElseThrow();
+                .filter(f -> (f.getRequestType().equals(request.getClass())))
+                .findFirst()
+                .map(Feature::getAction)
+                .orElseThrow();
     }
 
     /*private CallAuditDto buildCallAudit(Request request, Confirmation response,

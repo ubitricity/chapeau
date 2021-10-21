@@ -7,27 +7,30 @@
  */
 package com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model;
 
-import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.enums.RegistrationStatus;
-import eu.chargetime.ocpp.model.Confirmation;
+import eu.chargetime.ocpp.model.Validatable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.Positive;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BootNotificationConfirmation implements Confirmation {
+public class MeterValue implements Validatable {
 
-    private ZonedDateTime currentTime;
-    @Positive(message = "interval should have a positive value")
-    private int interval;
-    private RegistrationStatus status;
+    @NotNull
+    private ZonedDateTime timestamp;
+    @NotNull
+    @Valid
+    private List<SampledValue> sampledValue;
 
     @Override
     public boolean validate() {
-        return status != null && currentTime != null && interval > ModelConstants.INTERVAL_MIN_VALUE;
+        return timestamp != null && sampledValue != null && !sampledValue.isEmpty()
+            && sampledValue.stream().allMatch(SampledValue::validate);
     }
 }

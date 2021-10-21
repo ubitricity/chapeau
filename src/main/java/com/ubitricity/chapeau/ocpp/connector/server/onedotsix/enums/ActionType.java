@@ -5,7 +5,7 @@
  * All rights reserved. Dissemination, reproduction, or use of this material in source
  * and binary forms requires prior written permission from ubitricity.
  */
-package com.ubitricity.chapeau.ocpp.connector.server.onedotsix.feature;
+package com.ubitricity.chapeau.ocpp.connector.server.onedotsix.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

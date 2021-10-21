@@ -2,9 +2,13 @@ package com.ubitricity.chapeau;
 
 import com.ubitricity.chapeau.domain.NonExistingDeviceIdException;
 import com.ubitricity.chapeau.domain.RejectedRequestException;
+import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.ChangeChargingStatusRequest;
+import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.StartTransactionRequest;
+import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.StopTransactionRequest;
 import com.ubitricity.chapeau.service.ChapeauService;
 import io.quarkus.scheduler.Scheduled;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 
 import javax.ws.rs.*;
 
@@ -34,10 +38,11 @@ public class ChapeauResource {
     }
 
     @POST
-    @Path("status")
-    public String status(@PathParam("deviceId") String deviceId) {
+    @Path("changeStatus")
+    public String changeChargingStatus(@PathParam("deviceId") String deviceId,
+                                       @RequestBody ChangeChargingStatusRequest changeChargingStatusRequest) {
         try {
-            chapeauService.subscribeOnStatus(deviceId);
+            chapeauService.subscribeOnStatus(deviceId, changeChargingStatusRequest);
             return "OK";
         } catch (NonExistingDeviceIdException e) {
             log.error("Failed to subscribe for status notifications", e);
@@ -49,15 +54,33 @@ public class ChapeauResource {
     }
 
     @POST
-    @Path("plug")
-    public String plug(@PathParam("deviceId") String deviceId) {
-        throw new UnsupportedOperationException();
+    @Path("startTransaction")
+    public String startTransaction(@PathParam("deviceId") String deviceId, @RequestBody StartTransactionRequest request) {
+        try {
+            chapeauService.subscribeOnStartTransaction(deviceId, request);
+            return "OK";
+        } catch (NonExistingDeviceIdException e) {
+            log.error("Failed to start the transaction", e);
+            throw new NotFoundException(e.getMessage());
+        } catch (RejectedRequestException e) {
+            log.error("Charge point rejected the connection", e);
+            throw new ForbiddenException(e.getMessage());
+        }
     }
 
     @POST
-    @Path("unplug")
-    public String unplug(@PathParam("deviceId") String deviceId) {
-        throw new UnsupportedOperationException();
+    @Path("stopTransaction")
+    public String stopTransaction(@PathParam("deviceId") String deviceId, @RequestBody StopTransactionRequest request) {
+        try {
+            chapeauService.subscribeOnStopTransaction(deviceId, request);
+            return "OK";
+        } catch (NonExistingDeviceIdException e) {
+            log.error("Failed to stop the transaction", e);
+            throw new NotFoundException(e.getMessage());
+        } catch (RejectedRequestException e) {
+            log.error("Charge point rejected the connection", e);
+            throw new ForbiddenException(e.getMessage());
+        }
     }
 
     @POST
@@ -65,6 +88,7 @@ public class ChapeauResource {
     public String rfidSwipe(@PathParam("deviceId") String deviceId) {
         throw new UnsupportedOperationException();
     }
+
 
     @Scheduled(every = "20s", delayed = "10s")
 //    @Scheduled(every = "5m", delayed = "10s")
