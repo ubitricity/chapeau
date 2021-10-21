@@ -10,7 +10,7 @@ package com.ubitricity.chapeau.ocpp.connector.requesthandler.onedotsix;
 import com.ubitricity.chapeau.ocpp.connector.server.helper.OcppIncomingRequestHandler;
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.BootNotificationConfirmation;
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.BootNotificationRequest;
-import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.RegistrationStatus;
+import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.enums.RegistrationStatus;
 import eu.chargetime.ocpp.model.Confirmation;
 import eu.chargetime.ocpp.model.Request;
 import lombok.RequiredArgsConstructor;

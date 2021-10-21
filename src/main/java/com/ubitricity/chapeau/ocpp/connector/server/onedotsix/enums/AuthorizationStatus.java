@@ -5,16 +5,12 @@
  * All rights reserved. Dissemination, reproduction, or use of this material in source
  * and binary forms requires prior written permission from ubitricity.
  */
-package com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model;
+package com.ubitricity.chapeau.ocpp.connector.server.onedotsix.enums;
 
-public enum ChargePointStatus {
-    Available,
-    Preparing,
-    Charging,
-    SuspendedEVSE,
-    SuspendedEV,
-    Finishing,
-    Reserved,
-    Unavailable,
-    Faulted
+public enum AuthorizationStatus {
+    Accepted,
+    Blocked,
+    Expired,
+    Invalid,
+    ConcurrentTx
 }
