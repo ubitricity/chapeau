@@ -7,7 +7,6 @@
  */
 package com.ubitricity.chapeau.ocpp.connector.server.onedotsix;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ubitricity.chapeau.ocpp.connector.server.OcppSessionHandler;
 import com.ubitricity.chapeau.ocpp.connector.server.helper.OcppIncomingRequestHandler;
 import com.ubitricity.chapeau.ocpp.connector.server.helper.OcppProfile;
@@ -30,24 +29,17 @@ public class OcppOneDotSixProfile implements OcppProfile {
 
     private final OcppSessionHandler ocppSessionHandler;
     private final Map<Class<? extends Request>, OcppIncomingRequestHandler<? extends Request>> handlerMap;
-    //    private final CallAuditService callAuditService;
-    private final ObjectMapper objectMapper;
-//    private final Validator validator;
 
-    public OcppOneDotSixProfile(OcppSessionHandler ocppSessionHandler,
-                                Map<Class<? extends Request>, OcppIncomingRequestHandler<? extends Request>> handlerMap,
-            /*CallAuditService callAuditService,*/ ObjectMapper objectMapper/*, Validator validator*/) {
+    public OcppOneDotSixProfile(
+            OcppSessionHandler ocppSessionHandler,
+            Map<Class<? extends Request>, OcppIncomingRequestHandler<? extends Request>> handlerMap) {
         this.ocppSessionHandler = ocppSessionHandler;
         this.handlerMap = handlerMap;
-//        this.callAuditService = callAuditService;
-        this.objectMapper = objectMapper;
-//        this.validator = validator;
     }
 
     @Override
     public ProfileFeature[] getFeatureList() {
         return new ProfileFeature[]{
-//            new AuthorizeFeature(this),
                 new BootNotificationFeature(this),
                 new StatusNotificationFeature(this),
                 new StartTransactionFeature(this),
@@ -67,27 +59,8 @@ public class OcppOneDotSixProfile implements OcppProfile {
             return null;
         }
 
-        /*var violations = validator.validate(request);
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
-        }*/
-
-        /*StopWatch watch = new StopWatch();
-        watch.start();*/
-
-        var response = handlerMap.get(request.getClass())
+        return handlerMap.get(request.getClass())
                 .handleRequest(deviceIdSessionEntry.getValue(), deviceIdSessionEntry.getKey(), request, getProtocol());
-
-        /*watch.stop();
-
-        callAuditService.save(
-            buildCallAudit(
-                request, response, deviceIdSessionEntry.getKey(),
-                getProtocol(), findOperation(request), watch.getTotalTimeMillis()
-            )
-        );*/
-
-        return response;
     }
 
     @Override
@@ -102,26 +75,4 @@ public class OcppOneDotSixProfile implements OcppProfile {
                 .map(Feature::getAction)
                 .orElseThrow();
     }
-
-    /*private CallAuditDto buildCallAudit(Request request, Confirmation response,
-                                        String deviceId, String protocol,
-                                        String operation, Long callTimeMillis) {
-        try {
-            return CallAuditDto.builder()
-                .protocol(protocol)
-                .deviceId(deviceId)
-                .ocppRequest(objectMapper.writeValueAsString(request))
-                .ocppRequestClass(request.getClass().getName())
-                .ocppResponse(objectMapper.writeValueAsString(response))
-                .ocppResponseClass(response.getClass().getName())
-                .ocppOperation(operation)
-                .ocppCallTimeMillis(callTimeMillis)
-                .createdTimestamp(ZonedDateTime.now())
-                .build();
-        } catch (JsonProcessingException e) {
-            log.error("Error while trying to write request/response as JSON : ", e);
-        }
-
-        return null;
-    }*/
 }

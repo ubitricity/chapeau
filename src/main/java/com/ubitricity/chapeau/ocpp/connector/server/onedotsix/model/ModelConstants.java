@@ -7,10 +7,12 @@
  */
 package com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@RegisterForReflection
 public final class ModelConstants {
 
     public static final int STRING_20_CHAR_MAX_LENGTH = 20;

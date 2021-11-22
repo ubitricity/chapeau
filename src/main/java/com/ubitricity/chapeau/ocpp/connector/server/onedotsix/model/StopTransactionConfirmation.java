@@ -8,6 +8,7 @@
 package com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model;
 
 import eu.chargetime.ocpp.model.Confirmation;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,6 +17,7 @@ import javax.validation.constraints.NotNull;
 
 @Data
 @NoArgsConstructor
+@RegisterForReflection
 public class StopTransactionConfirmation implements Confirmation {
 
     @NotNull

@@ -1,3 +1,10 @@
+/*
+ * Copyright (c), ubitricity Gesellschaft für Verteilte Energiesysteme mbH,
+ * Berlin, Germany
+ *
+ * All rights reserved. Dissemination, reproduction, or use of this material in source
+ * and binary forms requires prior written permission from ubitricity.
+ */
 package com.ubitricity.chapeau.service;
 
 import com.ubitricity.chapeau.domain.NonExistingDeviceIdException;
@@ -15,7 +22,7 @@ import java.util.Collections;
 
 @QuarkusTest
 class ChapeauServiceTest {
-    private static final String REAL_DEVICE_ID = "suby01000000001";
+    private static final String REAL_DEVICE_ID = "suby0100000001";
     private static final String NON_EXISTING_DEVICE_ID = "fake-00001";
 
     @Inject

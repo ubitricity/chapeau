@@ -10,6 +10,7 @@ package com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model;
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.enums.ChargePointErrorCode;
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.enums.ChargePointStatus;
 import eu.chargetime.ocpp.model.Request;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,7 @@ import java.time.ZonedDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@RegisterForReflection
 public class StatusNotificationRequest implements Request {
 
     @NotNull

@@ -8,6 +8,7 @@
 package com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model;
 
 import eu.chargetime.ocpp.model.Validatable;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@RegisterForReflection
 public class MeterValue implements Validatable {
 
     @NotNull

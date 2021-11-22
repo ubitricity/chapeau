@@ -8,9 +8,11 @@
 package com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model;
 
 import eu.chargetime.ocpp.model.Confirmation;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
+@RegisterForReflection
 public class StatusNotificationConfirmation implements Confirmation {
 
     @Override

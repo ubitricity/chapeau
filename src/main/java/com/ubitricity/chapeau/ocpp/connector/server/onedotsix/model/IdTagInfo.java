@@ -9,6 +9,7 @@ package com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model;
 
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.enums.AuthorizationStatus;
 import eu.chargetime.ocpp.model.Validatable;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,7 @@ import java.time.ZonedDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@RegisterForReflection
 public class IdTagInfo implements Validatable {
 
     private ZonedDateTime expiryDate;

@@ -1,3 +1,10 @@
+/*
+ * Copyright (c), ubitricity Gesellschaft für Verteilte Energiesysteme mbH,
+ * Berlin, Germany
+ *
+ * All rights reserved. Dissemination, reproduction, or use of this material in source
+ * and binary forms requires prior written permission from ubitricity.
+ */
 package com.ubitricity.chapeau;
 
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.enums.ChargePointStatus;
@@ -16,7 +23,7 @@ import static org.hamcrest.CoreMatchers.is;
 @QuarkusTest
 public class ChapeauResourceTest {
 
-    private static final String REAL_DEVICE_ID = "suby01000000001";
+    private static final String REAL_DEVICE_ID = "suby0100000001";
     private static final String NON_EXISTING_DEVICE_ID = "fakeId0000";
 
     @Test
@@ -38,7 +45,7 @@ public class ChapeauResourceTest {
 
     @Test
     public void checkChangedChargingStatusWithRealDeviceId() {
-        String realDeviceId = "suby01000000001";
+        String realDeviceId = "suby0100000001";
 
         given()
                 .header("Content-type", "application/json")
@@ -66,7 +73,7 @@ public class ChapeauResourceTest {
 
     @Test
     public void checkStartTransactionWithRealDeviceId() {
-        String realDeviceId = "suby01000000001";
+        String realDeviceId = "suby0100000001";
 
         given()
                 .header("Content-type", "application/json")
@@ -96,7 +103,7 @@ public class ChapeauResourceTest {
 
     @Test
     public void checkStopTransactionWithRealDeviceId() {
-        String realDeviceId = "suby01000000001";
+        String realDeviceId = "suby0100000001";
 
         given()
                 .header("Content-type", "application/json")

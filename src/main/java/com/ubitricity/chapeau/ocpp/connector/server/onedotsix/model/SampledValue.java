@@ -9,6 +9,7 @@ package com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model;
 
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.enums.*;
 import eu.chargetime.ocpp.model.Validatable;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -16,6 +17,7 @@ import javax.validation.constraints.NotNull;
 
 @Data
 @AllArgsConstructor
+@RegisterForReflection
 public class SampledValue implements Validatable {
 
     @NotNull

@@ -12,13 +12,9 @@ import lombok.RequiredArgsConstructor;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 
-//@Configuration
 @RequiredArgsConstructor
-//@ConditionalOnProperty(prefix = "ocpp", name = "version", havingValue = "1.6")
 @ApplicationScoped
 public class OcppRequestHandlerOneDotSixConfig {
-
-//    private final DeviceService deviceService;
 
     @Produces
     public BootNotificationRequestOneDotSixHandler bootNotificationRequestOneDotSixHandler() {
@@ -29,6 +25,5 @@ public class OcppRequestHandlerOneDotSixConfig {
     public StatusNotificationOneDotSixHandler statusNotificationOneDotSixHandler() {
         return new StatusNotificationOneDotSixHandler(/*deviceService*/);
     }
-
 
 }

@@ -9,6 +9,7 @@ package com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model;
 
 import eu.chargetime.ocpp.model.Request;
 import eu.chargetime.ocpp.utilities.ModelUtil;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.*;
 
 import javax.validation.constraints.NotEmpty;
@@ -20,6 +21,7 @@ import static com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.Model
 @RequiredArgsConstructor(staticName = "of")
 @NoArgsConstructor
 @AllArgsConstructor
+@RegisterForReflection
 public class BootNotificationRequest implements Request {
 
     @NonNull

@@ -7,6 +7,9 @@
  */
 package com.ubitricity.chapeau.ocpp.connector.server.onedotsix.enums;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
+@RegisterForReflection
 public enum RegistrationStatus {
 
     Accepted,
