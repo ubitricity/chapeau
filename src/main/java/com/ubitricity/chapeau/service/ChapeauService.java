@@ -4,12 +4,13 @@ import com.ubitricity.chapeau.domain.Devices;
 import com.ubitricity.chapeau.domain.NonExistingDeviceIdException;
 import com.ubitricity.chapeau.domain.RejectedRequestException;
 import com.ubitricity.chapeau.ocpp.client.OcppJsonClient;
+import com.ubitricity.chapeau.ocpp.connector.requesthandler.onedotsix.RemoteStartTransactionRequestOneDotSixHandler;
 import com.ubitricity.chapeau.ocpp.connector.server.JSONConfiguration;
+import com.ubitricity.chapeau.ocpp.connector.server.helper.OcppIncomingRequestHandler;
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.OcppOneDotSixProfile;
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.enums.ChargePointErrorCode;
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.enums.RegistrationStatus;
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.*;
-import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.BootNotificationRequest;
 import eu.chargetime.ocpp.OccurenceConstraintException;
 import eu.chargetime.ocpp.UnsupportedFeatureException;
 import eu.chargetime.ocpp.model.Request;
@@ -17,13 +18,17 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.quarkus.runtime.StartupEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @ApplicationScoped
@@ -41,8 +46,6 @@ public class ChapeauService {
     private final Map<String, OcppJsonClient> clientMap = new HashMap<>();
     @Inject
     Devices devices;
-    @Inject
-    OcppOneDotSixProfile ocppOneDotSixProfile;
     @ConfigProperty(name = "ocpp.url")
     String URL;
     @Inject
@@ -65,7 +68,12 @@ public class ChapeauService {
         String deviceId = device.deviceId();
         jsonConfiguration.setParameter(JSONConfiguration.USERNAME_PARAMETER, deviceId);
         jsonConfiguration.setParameter(JSONConfiguration.PASSWORD_PARAMETER, device.authorizationCode());
-        OcppJsonClient client = new OcppJsonClient(deviceId, ocppOneDotSixProfile, jsonConfiguration);
+        List<OcppIncomingRequestHandler<?>> ocppIncomingRequestHandlers =
+                List.of(new RemoteStartTransactionRequestOneDotSixHandler());
+        OcppJsonClient client = new OcppJsonClient(deviceId, new OcppOneDotSixProfile(
+                deviceId, ocppIncomingRequestHandlers.stream()
+                .collect(Collectors.toMap(OcppIncomingRequestHandler::supports, Function.identity()))),
+                jsonConfiguration);
         client.connect(URL, null);
         return client;
     }
@@ -180,9 +188,5 @@ public class ChapeauService {
     private OcppJsonClient getClientFor(String deviceId) throws NonExistingDeviceIdException {
         Devices.Device device = devices.findWithId(deviceId).orElseThrow(() -> new NonExistingDeviceIdException(deviceId));
         return clientMap.computeIfAbsent(deviceId, s -> getClient(device));
-    }
-
-    public boolean subscribeOnAutorization(String deviceId) {
-        return false;
     }
 }

@@ -8,8 +8,9 @@
 package com.ubitricity.chapeau.ocpp.connector.requesthandler.onedotsix;
 
 import com.ubitricity.chapeau.ocpp.connector.server.helper.OcppIncomingRequestHandler;
-import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.StatusNotificationConfirmation;
-import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.StatusNotificationRequest;
+import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.RemoteStartStopStatus;
+import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.RemoteStartTransactionConfirmation;
+import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.RemoteStartTransactionRequest;
 import eu.chargetime.ocpp.model.Confirmation;
 import eu.chargetime.ocpp.model.Request;
 import lombok.RequiredArgsConstructor;
@@ -17,15 +18,16 @@ import lombok.RequiredArgsConstructor;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public class StatusNotificationOneDotSixHandler implements OcppIncomingRequestHandler<StatusNotificationRequest> {
+public class RemoteStartTransactionRequestOneDotSixHandler
+        implements OcppIncomingRequestHandler<RemoteStartTransactionRequest> {
 
     @Override
     public Confirmation handleRequest(UUID sessionId, String deviceId, Request request, String protocol) {
-        return new StatusNotificationConfirmation();
+        return new RemoteStartTransactionConfirmation(RemoteStartStopStatus.Accepted);
     }
 
     @Override
-    public Class<StatusNotificationRequest> supports() {
-        return StatusNotificationRequest.class;
+    public Class<RemoteStartTransactionRequest> supports() {
+        return RemoteStartTransactionRequest.class;
     }
 }

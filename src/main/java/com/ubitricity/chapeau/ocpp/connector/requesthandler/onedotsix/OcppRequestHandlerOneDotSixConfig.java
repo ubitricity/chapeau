@@ -17,13 +17,8 @@ import javax.enterprise.inject.Produces;
 public class OcppRequestHandlerOneDotSixConfig {
 
     @Produces
-    public BootNotificationRequestOneDotSixHandler bootNotificationRequestOneDotSixHandler() {
-        return new BootNotificationRequestOneDotSixHandler(/*deviceService*/);
-    }
-
-    @Produces
-    public StatusNotificationOneDotSixHandler statusNotificationOneDotSixHandler() {
-        return new StatusNotificationOneDotSixHandler(/*deviceService*/);
+    public RemoteStartTransactionRequestOneDotSixHandler remoteStartTransactionRequestOneDotSixHandler() {
+        return new RemoteStartTransactionRequestOneDotSixHandler();
     }
 
 }
