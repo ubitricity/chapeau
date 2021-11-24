@@ -3,6 +3,7 @@ package com.ubitricity.chapeau.service;
 import com.ubitricity.chapeau.domain.Devices;
 import com.ubitricity.chapeau.domain.NonExistingDeviceIdException;
 import com.ubitricity.chapeau.domain.RejectedRequestException;
+import com.ubitricity.chapeau.domain.Transaction;
 import com.ubitricity.chapeau.ocpp.client.OcppJsonClient;
 import com.ubitricity.chapeau.ocpp.connector.requesthandler.onedotsix.RemoteStartTransactionRequestOneDotSixHandler;
 import com.ubitricity.chapeau.ocpp.connector.server.JSONConfiguration;
@@ -44,6 +45,7 @@ public class ChapeauService {
     private static final String METER_TYPE = "meter-type";
     private static final String VENDOR_ID = "ubi123";
     private final Map<String, OcppJsonClient> clientMap = new HashMap<>();
+    private final Map<String, Transaction> deviceTransactionMap = new HashMap<>();
     @Inject
     Devices devices;
     @ConfigProperty(name = "ocpp.url")
@@ -60,6 +62,7 @@ public class ChapeauService {
             log.info("device.deviceId() = {}", device.deviceId());
             log.info("device.authorizationCode() = {}", device.authorizationCode());
             log.info("device.checkAvailability() = {}", device.checkAvailability());
+            deviceTransactionMap.put(device.deviceId(), new Transaction());
         }
     }
 
@@ -69,7 +72,7 @@ public class ChapeauService {
         jsonConfiguration.setParameter(JSONConfiguration.USERNAME_PARAMETER, deviceId);
         jsonConfiguration.setParameter(JSONConfiguration.PASSWORD_PARAMETER, device.authorizationCode());
         List<OcppIncomingRequestHandler<?>> ocppIncomingRequestHandlers =
-                List.of(new RemoteStartTransactionRequestOneDotSixHandler());
+                List.of(new RemoteStartTransactionRequestOneDotSixHandler(deviceTransactionMap));
         OcppJsonClient client = new OcppJsonClient(deviceId, new OcppOneDotSixProfile(
                 deviceId, ocppIncomingRequestHandlers.stream()
                 .collect(Collectors.toMap(OcppIncomingRequestHandler::supports, Function.identity()))),
@@ -147,9 +150,14 @@ public class ChapeauService {
             throws NonExistingDeviceIdException, RejectedRequestException {
         try {
             OcppJsonClient client = getClientFor(deviceId);
+            String currentIdTag = deviceTransactionMap.get(deviceId).idTag;
+            if (currentIdTag != null && currentIdTag.equals(request.getIdTag())) {
+                request.setIdTag(currentIdTag);
+            }
             StartTransactionConfirmation startTransactionConfirmationResponse =
                     (StartTransactionConfirmation) client.send(request).toCompletableFuture().get();
             Boolean startTransactionValidate = startTransactionConfirmationResponse.validate();
+            deviceTransactionMap.get(deviceId).transactionId = startTransactionConfirmationResponse.getTransactionId();
             log.info("From SubscribeOnStartTransaction, ChargePoint: {}; response.validate() = {}", deviceId, startTransactionValidate);
             if (!startTransactionValidate) {
                 throw new RejectedRequestException("Start Transaction request rejected");
@@ -164,11 +172,15 @@ public class ChapeauService {
         return false;
     }
 
-    public boolean subscribeOnStopTransaction(String deviceId, StopTransactionRequest stopTransactionRequest)
+    public boolean subscribeOnStopTransaction(String deviceId, StopTransactionRequest request)
             throws NonExistingDeviceIdException, RejectedRequestException {
         try {
             OcppJsonClient client = getClientFor(deviceId);
-            StopTransactionConfirmation response = (StopTransactionConfirmation) client.send(stopTransactionRequest)
+            Integer currentTransactionId = deviceTransactionMap.get(deviceId).transactionId;
+            if (currentTransactionId != null && currentTransactionId.equals(request.getTransactionId())) {
+                request.setTransactionId(request.getTransactionId());
+            }
+            StopTransactionConfirmation response = (StopTransactionConfirmation) client.send(request)
                     .toCompletableFuture().get();
             boolean validate = response.validate();
             log.info("From subscribeOnStopTransaction, ChargePoint: {}; response.validate() = {}", deviceId, validate);
