@@ -151,7 +151,7 @@ public class ChapeauService {
         try {
             OcppJsonClient client = getClientFor(deviceId);
             String currentIdTag = deviceTransactionMap.get(deviceId).idTag;
-            if (currentIdTag != null && currentIdTag.equals(request.getIdTag())) {
+            if (currentIdTag != null && !currentIdTag.equals(request.getIdTag())) {
                 request.setIdTag(currentIdTag);
             }
             StartTransactionConfirmation startTransactionConfirmationResponse =
@@ -176,9 +176,11 @@ public class ChapeauService {
             throws NonExistingDeviceIdException, RejectedRequestException {
         try {
             OcppJsonClient client = getClientFor(deviceId);
+            String idTag = deviceTransactionMap.get(deviceId).idTag;
             Integer currentTransactionId = deviceTransactionMap.get(deviceId).transactionId;
-            if (currentTransactionId != null && currentTransactionId.equals(request.getTransactionId())) {
-                request.setTransactionId(request.getTransactionId());
+            if (currentTransactionId != null && !currentTransactionId.equals(request.getTransactionId())) {
+                request.setIdTag(idTag);
+                request.setTransactionId(currentTransactionId);
             }
             StopTransactionConfirmation response = (StopTransactionConfirmation) client.send(request)
                     .toCompletableFuture().get();
