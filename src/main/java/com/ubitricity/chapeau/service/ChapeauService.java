@@ -130,6 +130,19 @@ public class ChapeauService {
         }
     }
 
+    public void sendHeartbeat(String deviceId) throws NonExistingDeviceIdException, RejectedRequestException {
+        Request request = new HeartbeatRequest();
+        try {
+            OcppJsonClient client = getClientFor(deviceId);
+            HeartbeatConfirmation response = (HeartbeatConfirmation) client.send(request).toCompletableFuture().get();
+            ZonedDateTime time = response.getCurrentTime();
+            log.info("From SubscribeOnHeartbeat, ChargePoint: {}; response.getCurrentTime() = {}", deviceId, time);
+        } catch (InterruptedException | ExecutionException | OccurenceConstraintException | UnsupportedFeatureException e) {
+            log.error("Error while getting BootNotificationConfirmation", e);
+            throw new IllegalStateException(e);
+        }
+    }
+
     public void subscribeOnStatus(String deviceId, ChangeChargingStatusRequest changeChargingStatusRequest) throws NonExistingDeviceIdException, RejectedRequestException {
         Request request = buildStatusNotificationRequest(changeChargingStatusRequest);
         try {
