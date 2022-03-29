@@ -38,7 +38,8 @@ public class OcppOneDotSixProfile implements OcppProfile {
                 new StatusNotificationFeature(this),
                 new StartTransactionFeature(this),
                 new StopTransactionFeature(this),
-                new RemoteStartTransactionFeature(this)
+                new RemoteStartTransactionFeature(this),
+                new HeartbeatFeature(this)
         };
     }
 

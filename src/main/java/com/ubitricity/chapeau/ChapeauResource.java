@@ -38,6 +38,21 @@ public class ChapeauResource {
     }
 
     @POST
+    @Path("sendHeartbeat")
+    public String sendHeartbeat(@PathParam("deviceId") String deviceId) {
+        try {
+            chapeauService.sendHeartbeat(deviceId);
+            return "OK";
+        } catch (NonExistingDeviceIdException e) {
+            log.error("Failed to subscribe for boot notifications", e);
+            throw new NotFoundException(e.getMessage());
+        } catch (RejectedRequestException e) {
+            log.error("Charge point rejected the connection", e);
+            throw new ForbiddenException(e.getMessage());
+        }
+    }
+
+    @POST
     @Path("changeStatus")
     public String changeChargingStatus(@PathParam("deviceId") String deviceId,
                                        @RequestBody ChangeChargingStatusRequest changeChargingStatusRequest) {
