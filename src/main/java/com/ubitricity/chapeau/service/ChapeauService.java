@@ -136,7 +136,7 @@ public class ChapeauService {
             OcppJsonClient client = getClientFor(deviceId);
             HeartbeatConfirmation response = (HeartbeatConfirmation) client.send(request).toCompletableFuture().get();
             ZonedDateTime time = response.getCurrentTime();
-            log.info("From SubscribeOnBoot, ChargePoint: {}; response.getCurrentTime() = {}", deviceId, time);
+            log.info("From SubscribeOnHeartbeat, ChargePoint: {}; response.getCurrentTime() = {}", deviceId, time);
         } catch (InterruptedException | ExecutionException | OccurenceConstraintException | UnsupportedFeatureException e) {
             log.error("Error while getting BootNotificationConfirmation", e);
             throw new IllegalStateException(e);

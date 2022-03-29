@@ -44,7 +44,7 @@ public class ChapeauResource {
             chapeauService.sendHeartbeat(deviceId);
             return "OK";
         } catch (NonExistingDeviceIdException e) {
-            log.error("Failed to subscribe for boot notifications", e);
+            log.error("Failed to subscribe for heartbeat notifications", e);
             throw new NotFoundException(e.getMessage());
         } catch (RejectedRequestException e) {
             log.error("Charge point rejected the connection", e);
