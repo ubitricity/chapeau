@@ -5,6 +5,7 @@ import com.ubitricity.chapeau.domain.NonExistingDeviceIdException;
 import com.ubitricity.chapeau.domain.RejectedRequestException;
 import com.ubitricity.chapeau.domain.Transaction;
 import com.ubitricity.chapeau.ocpp.client.OcppJsonClient;
+import com.ubitricity.chapeau.ocpp.connector.requesthandler.onedotsix.ChangeConfigurationRequestHandler;
 import com.ubitricity.chapeau.ocpp.connector.requesthandler.onedotsix.RemoteStartTransactionRequestOneDotSixHandler;
 import com.ubitricity.chapeau.ocpp.connector.server.JSONConfiguration;
 import com.ubitricity.chapeau.ocpp.connector.server.helper.OcppIncomingRequestHandler;
@@ -71,8 +72,10 @@ public class ChapeauService {
         String deviceId = device.deviceId();
         jsonConfiguration.setParameter(JSONConfiguration.USERNAME_PARAMETER, deviceId);
         jsonConfiguration.setParameter(JSONConfiguration.PASSWORD_PARAMETER, device.authorizationCode());
-        List<OcppIncomingRequestHandler<?>> ocppIncomingRequestHandlers =
-                List.of(new RemoteStartTransactionRequestOneDotSixHandler(deviceTransactionMap));
+        List<OcppIncomingRequestHandler<?>> ocppIncomingRequestHandlers = List.of(
+                new RemoteStartTransactionRequestOneDotSixHandler(deviceTransactionMap),
+                new ChangeConfigurationRequestHandler()
+        );
         OcppJsonClient client = new OcppJsonClient(deviceId, new OcppOneDotSixProfile(
                 deviceId, ocppIncomingRequestHandlers.stream()
                 .collect(Collectors.toMap(OcppIncomingRequestHandler::supports, Function.identity()))),
