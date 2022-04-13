@@ -40,7 +40,8 @@ public class OcppOneDotSixProfile implements OcppProfile {
                 new StopTransactionFeature(this),
                 new RemoteStartTransactionFeature(this),
                 new HeartbeatFeature(this),
-                new ChangeConfigurationFeature(this)
+                new ChangeConfigurationFeature(this),
+                new ResetFeature(this)
         };
     }
 
