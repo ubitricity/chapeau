@@ -7,6 +7,7 @@ import com.ubitricity.chapeau.domain.Transaction;
 import com.ubitricity.chapeau.ocpp.client.OcppJsonClient;
 import com.ubitricity.chapeau.ocpp.connector.requesthandler.onedotsix.ChangeConfigurationRequestHandler;
 import com.ubitricity.chapeau.ocpp.connector.requesthandler.onedotsix.RemoteStartTransactionRequestOneDotSixHandler;
+import com.ubitricity.chapeau.ocpp.connector.requesthandler.onedotsix.ResetRequestHandler;
 import com.ubitricity.chapeau.ocpp.connector.server.JSONConfiguration;
 import com.ubitricity.chapeau.ocpp.connector.server.helper.OcppIncomingRequestHandler;
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.OcppOneDotSixProfile;
@@ -74,7 +75,8 @@ public class ChapeauService {
         jsonConfiguration.setParameter(JSONConfiguration.PASSWORD_PARAMETER, device.authorizationCode());
         List<OcppIncomingRequestHandler<?>> ocppIncomingRequestHandlers = List.of(
                 new RemoteStartTransactionRequestOneDotSixHandler(deviceTransactionMap),
-                new ChangeConfigurationRequestHandler()
+                new ChangeConfigurationRequestHandler(),
+                new ResetRequestHandler()
         );
         OcppJsonClient client = new OcppJsonClient(deviceId, new OcppOneDotSixProfile(
                 deviceId, ocppIncomingRequestHandlers.stream()
