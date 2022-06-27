@@ -5,6 +5,7 @@ import com.ubitricity.chapeau.domain.RejectedRequestException;
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.ChangeChargingStatusRequest;
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.StartTransactionRequest;
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.StopTransactionRequest;
+import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.UpdateFirmwareRequest;
 import com.ubitricity.chapeau.service.ChapeauService;
 import io.quarkus.scheduler.Scheduled;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,22 @@ public class ChapeauResource {
             return "OK";
         } catch (NonExistingDeviceIdException e) {
             log.error("Failed to subscribe for heartbeat notifications", e);
+            throw new NotFoundException(e.getMessage());
+        } catch (RejectedRequestException e) {
+            log.error("Charge point rejected the connection", e);
+            throw new ForbiddenException(e.getMessage());
+        }
+    }
+
+    @POST
+    @Path("updateFirmware")
+    public String updateFirmware(@PathParam("deviceId") String deviceId,
+                                 @RequestBody UpdateFirmwareRequest updateFirmwareRequest) {
+        try {
+            chapeauService.updateFirmware(deviceId, updateFirmwareRequest);
+            return "OK";
+        } catch (NonExistingDeviceIdException e) {
+            log.error("Failed update firmware", e);
             throw new NotFoundException(e.getMessage());
         } catch (RejectedRequestException e) {
             log.error("Charge point rejected the connection", e);

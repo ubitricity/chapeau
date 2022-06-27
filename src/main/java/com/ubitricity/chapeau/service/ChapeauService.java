@@ -8,6 +8,7 @@ import com.ubitricity.chapeau.ocpp.client.OcppJsonClient;
 import com.ubitricity.chapeau.ocpp.connector.requesthandler.onedotsix.ChangeConfigurationRequestHandler;
 import com.ubitricity.chapeau.ocpp.connector.requesthandler.onedotsix.RemoteStartTransactionRequestOneDotSixHandler;
 import com.ubitricity.chapeau.ocpp.connector.requesthandler.onedotsix.ResetRequestHandler;
+import com.ubitricity.chapeau.ocpp.connector.requesthandler.onedotsix.UpdateFirmwareRequestHandler;
 import com.ubitricity.chapeau.ocpp.connector.server.JSONConfiguration;
 import com.ubitricity.chapeau.ocpp.connector.server.helper.OcppIncomingRequestHandler;
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.OcppOneDotSixProfile;
@@ -16,6 +17,7 @@ import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.enums.Registration
 import com.ubitricity.chapeau.ocpp.connector.server.onedotsix.model.*;
 import eu.chargetime.ocpp.OccurenceConstraintException;
 import eu.chargetime.ocpp.UnsupportedFeatureException;
+import eu.chargetime.ocpp.model.Confirmation;
 import eu.chargetime.ocpp.model.Request;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.quarkus.runtime.StartupEvent;
@@ -76,7 +78,8 @@ public class ChapeauService {
         List<OcppIncomingRequestHandler<?>> ocppIncomingRequestHandlers = List.of(
                 new RemoteStartTransactionRequestOneDotSixHandler(deviceTransactionMap),
                 new ChangeConfigurationRequestHandler(),
-                new ResetRequestHandler()
+                new ResetRequestHandler(),
+                new UpdateFirmwareRequestHandler()
         );
         OcppJsonClient client = new OcppJsonClient(deviceId, new OcppOneDotSixProfile(
                 deviceId, ocppIncomingRequestHandlers.stream()
@@ -122,8 +125,8 @@ public class ChapeauService {
     public void subscribeOnBoot(String deviceId) throws NonExistingDeviceIdException, RejectedRequestException {
         Request request = buildBootNotificationRequest(deviceId);
         try {
-            OcppJsonClient client = getClientFor(deviceId);
-            BootNotificationConfirmation response = (BootNotificationConfirmation) client.send(request).toCompletableFuture().get();
+            var response = (BootNotificationConfirmation) sendRequest(deviceId, request);
+
             RegistrationStatus status = response.getStatus();
             log.info("From SubscribeOnBoot, ChargePoint: {}; response.getStatus() = {}", deviceId, status);
             if (status == RegistrationStatus.Rejected) {
@@ -136,10 +139,8 @@ public class ChapeauService {
     }
 
     public void sendHeartbeat(String deviceId) throws NonExistingDeviceIdException, RejectedRequestException {
-        Request request = new HeartbeatRequest();
         try {
-            OcppJsonClient client = getClientFor(deviceId);
-            HeartbeatConfirmation response = (HeartbeatConfirmation) client.send(request).toCompletableFuture().get();
+            var response = (HeartbeatConfirmation) sendRequest(deviceId, (Request) new HeartbeatRequest());
             ZonedDateTime time = response.getCurrentTime();
             log.info("From SubscribeOnHeartbeat, ChargePoint: {}; response.getCurrentTime() = {}", deviceId, time);
         } catch (InterruptedException | ExecutionException | OccurenceConstraintException | UnsupportedFeatureException e) {
@@ -148,11 +149,25 @@ public class ChapeauService {
         }
     }
 
+    public void updateFirmware(String deviceId, UpdateFirmwareRequest updateFirmwareRequest)
+            throws NonExistingDeviceIdException, RejectedRequestException {
+        try {
+            var response = (UpdateFirmwareConfirmation) sendRequest(deviceId, updateFirmwareRequest);
+            if (!response.validate()) {
+                throw new RejectedRequestException("Update firmware rejected");
+            }
+            log.info("From updateFirmware, ChargePoint: {}; UpdateFirmwareRequest accepted", deviceId);
+        } catch (InterruptedException | ExecutionException | OccurenceConstraintException | UnsupportedFeatureException e) {
+            log.error("Error while getting UpdateFirmwareConfirmation", e);
+            throw new IllegalStateException(e);
+        }
+    }
+
+
     public void subscribeOnStatus(String deviceId, ChangeChargingStatusRequest changeChargingStatusRequest) throws NonExistingDeviceIdException, RejectedRequestException {
         Request request = buildStatusNotificationRequest(changeChargingStatusRequest);
         try {
-            OcppJsonClient client = getClientFor(deviceId);
-            StatusNotificationConfirmation response = (StatusNotificationConfirmation) client.send(request).toCompletableFuture().get();
+            var response = (StatusNotificationConfirmation) sendRequest(deviceId, request);
             boolean validate = response.validate();
             log.info("From SubscribeOnStatus, ChargePoint: {}; response.validate() = {}", deviceId, validate);
             if (!validate) {
@@ -167,13 +182,12 @@ public class ChapeauService {
     public boolean subscribeOnStartTransaction(String deviceId, StartTransactionRequest request)
             throws NonExistingDeviceIdException, RejectedRequestException {
         try {
-            OcppJsonClient client = getClientFor(deviceId);
             String currentIdTag = deviceTransactionMap.get(deviceId).idTag;
             if (currentIdTag != null && !currentIdTag.equals(request.getIdTag())) {
                 request.setIdTag(currentIdTag);
             }
-            StartTransactionConfirmation startTransactionConfirmationResponse =
-                    (StartTransactionConfirmation) client.send(request).toCompletableFuture().get();
+            var startTransactionConfirmationResponse = (StartTransactionConfirmation) sendRequest(deviceId, request);
+
             Boolean startTransactionValidate = startTransactionConfirmationResponse.validate();
             deviceTransactionMap.get(deviceId).transactionId = startTransactionConfirmationResponse.getTransactionId();
             log.info("From SubscribeOnStartTransaction, ChargePoint: {}; response.validate() = {}", deviceId, startTransactionValidate);
@@ -193,15 +207,13 @@ public class ChapeauService {
     public boolean subscribeOnStopTransaction(String deviceId, StopTransactionRequest request)
             throws NonExistingDeviceIdException, RejectedRequestException {
         try {
-            OcppJsonClient client = getClientFor(deviceId);
             String idTag = deviceTransactionMap.get(deviceId).idTag;
             Integer currentTransactionId = deviceTransactionMap.get(deviceId).transactionId;
             if (currentTransactionId != null && !currentTransactionId.equals(request.getTransactionId())) {
                 request.setIdTag(idTag);
                 request.setTransactionId(currentTransactionId);
             }
-            StopTransactionConfirmation response = (StopTransactionConfirmation) client.send(request)
-                    .toCompletableFuture().get();
+            var response = (StopTransactionConfirmation) sendRequest(deviceId, request);
             boolean validate = response.validate();
             log.info("From subscribeOnStopTransaction, ChargePoint: {}; response.validate() = {}", deviceId, validate);
             if (!validate) {
@@ -217,7 +229,13 @@ public class ChapeauService {
         return false;
     }
 
-    private OcppJsonClient getClientFor(String deviceId) throws NonExistingDeviceIdException {
+    private <R extends Request> Confirmation sendRequest(String deviceId, R request)
+            throws InterruptedException, ExecutionException, OccurenceConstraintException, UnsupportedFeatureException,
+                    NonExistingDeviceIdException {
+        return clientFor(deviceId).send(request).toCompletableFuture().get();
+    }
+
+    private OcppJsonClient clientFor(String deviceId) throws NonExistingDeviceIdException {
         Devices.Device device = devices.findWithId(deviceId).orElseThrow(() -> new NonExistingDeviceIdException(deviceId));
         return clientMap.computeIfAbsent(deviceId, s -> getClient(device));
     }
